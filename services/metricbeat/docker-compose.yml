@@ -1,0 +1,26 @@
+---
+version: "2.1"
+services:
+  #Metricbeat container
+  metricbeat:
+    container_name: metricbeat
+    hostname: metricbeat
+    user: root
+    image: docker.elastic.co/beats/metricbeat:${ELASTIC_VERSION}
+    volumes:
+      #Mount the metricbeat configuration so users can make edit
+      - ${METRICBEAT_CONFIG}/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      #Mount the modules.d directory into the container. This allows user to potentially make changes to the modules and they will be dynamically loaded.
+      - ${METRICBEAT_CONFIG}/modules.d/:/usr/share/metricbeat/modules.d/
+      # The commented sections below enable Metricbeat to monitor the Docker host rather than the Metricbeat container. These are used by the system module.
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /proc:/hostfs/proc:ro
+      #Allows us to report on docker from the hosts information
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      #We mount the host filesystem so we can report on disk usage with the system module
+      - /:/hostfs:ro
+    command: metricbeat -e -system.hostfs=/hostfs -E cloud.id=${ES_CLOUD_ID} -E cloud.auth=elastic:${ES_CLOUD_AUTH} -strict.perms=false
+    networks: ['host']
+    restart: on-failure
+
+networks: {host: {}}

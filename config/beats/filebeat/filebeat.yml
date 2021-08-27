@@ -1,0 +1,23 @@
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+# Collect docker logs
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+# Configure the default config that will be launched when a new container is seen
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      # hints.default_config:
+      #   type: container
+      #   paths:
+      #     - /var/log/containers/*-${data.container.id}.log
+
+processors:
+- add_cloud_metadata: ~

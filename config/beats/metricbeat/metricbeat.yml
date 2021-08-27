@@ -1,0 +1,19 @@
+metricbeat.config:
+  #Modules are enabled by reading the .modules.d sub directory. Changes to these will automatically be detected and reflected.
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.period: 10s
+    # Reload module configs as they change:
+    reload.enabled: true
+
+# Collect docker logs
+metricbeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+processors:
+  - add_cloud_metadata: ~
+
+logging.to_files: false
+

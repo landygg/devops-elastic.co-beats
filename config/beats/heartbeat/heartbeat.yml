@@ -1,0 +1,16 @@
+heartbeat.monitors:
+#Monitor all containers using an icmp ping
+- type: icmp
+  schedule: '*/5 * * * * * *'
+  hosts:
+    - filebeat
+    - metricbeat
+  ipv4: true
+  mode: any
+  timeout: 16s
+  wait: 1s
+
+processors:
+- add_cloud_metadata: ~
+    
+logging.to_files: false

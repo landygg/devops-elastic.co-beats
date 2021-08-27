@@ -1,0 +1,16 @@
+---
+version: "2.1"
+services:
+  #Heartbeat container
+  heartbeat:
+    container_name: heartbeat
+    hostname: heartbeat
+    image: "docker.elastic.co/beats/heartbeat:${ELASTIC_VERSION}"
+    volumes:
+      #Mount the heartbeat configuration so users can make edits
+      - ${HEARTBEAT_CONFIG}/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml
+    command: heartbeat -e -E cloud.id=${ES_CLOUD_ID} -E cloud.auth=elastic:${ES_CLOUD_AUTH} -strict.perms=false
+    networks: ['host']
+    restart: on-failure
+
+networks: {host: {}}

@@ -1,0 +1,32 @@
+---
+version: "2.1"
+services:
+  #Filebeat container
+  filebeat:
+    container_name: filebeat
+    hostname: filebeat
+    user: root
+    image: "docker.elastic.co/beats/filebeat:${ELASTIC_VERSION}"
+    volumes:
+      #Mount the filebeat configuration so users can make edit
+      - ${FILEBEAT_CONFIG}/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      #Mount the modules directory. Users can in turn add modules to this directory and they will be dynamically loaded
+      - ${FILEBEAT_CONFIG}/modules.d/:/usr/share/filebeat/modules.d/
+      #Mount the nginx logs into the filebeat container so we can access and index them using the filebeat nginx module
+      - /var/log/nginx/:/var/log/nginx/
+      #Mount the hosts system log directory. This represents the logs of the VM hosting docker. Consumed by the filebeat system module.
+      - /var/log/:/var/log/host/:ro
+      #Mount the docker logs
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      #Named volume fsdata. This is used to persist the registry file between restarts, so to avoid data duplication
+      - fbdata:/usr/share/filebeat/data/      
+    networks: ['host']
+    command: filebeat -e -E cloud.id=${ES_CLOUD_ID} -E cloud.auth=elastic:${ES_CLOUD_AUTH} -strict.perms=false
+    restart: on-failure
+
+volumes:
+  #Filebeat data
+  fbdata:
+    driver: local
+networks: {host: {}}
